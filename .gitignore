@@ -61,3 +61,4 @@ dkms.conf
 .settings
 Debug
 TIM_PWMOutput/
+FreeRTOS_ThreadCreation/
