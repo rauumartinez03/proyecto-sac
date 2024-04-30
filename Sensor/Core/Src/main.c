@@ -38,6 +38,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 #define ITM_Port32(n)	(*((volatile unsigned long *)(0xE0000000+4*n)))
+#define ADC_CONVERTED_DATA_BUFFER_SIZE 1 //Tamaño del buffer para el ADC
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -62,7 +63,7 @@ const osThreadAttr_t ldrTask_attributes = {
   .stack_size = 128 * 4
 };
 /* USER CODE BEGIN PV */
-uint16_t readValue;
+uint16_t aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE]; //Buffer del adc
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -119,7 +120,23 @@ int main(void)
   MX_TIM3_Init();
   MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start(&hadc1);
+  //HAL_ADC_Start(&hadc1);
+
+  /*Inicializacion del timer3 para el ADC, configurado para que active el ADC en el flanco de bajada a 1Hz**/
+  if (HAL_TIM_Base_Start(&htim3) != HAL_OK)
+    {
+      /* Counter enable error */
+      Error_Handler();
+    }
+
+  if (HAL_ADC_Start_DMA(&hadc1, //Activo el ADC que metera los datos convertidos en el buffer correspondiente.
+                            (uint32_t *)aADCxConvertedData,
+                            ADC_CONVERTED_DATA_BUFFER_SIZE
+                           ) != HAL_OK)
+      {
+        /* ADC conversion start error */
+        Error_Handler();
+      }
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -411,7 +428,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 65535;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -584,10 +601,10 @@ void StartLDRTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_ADC_PollForConversion(&hadc1,3000);
-	  readValue = HAL_ADC_GetValue(&hadc1);
-	  printf("LDR: %d\n\r", readValue);
-	  osDelay(300);
+	  //HAL_ADC_PollForConversion(&hadc1,3000);
+	  //readValue = HAL_ADC_GetValue(&hadc1);
+	  //printf("LDR: %d\n\r", aADCxConvertedData[0]);
+	  //osDelay(1000);
   }
   /* USER CODE END StartLDRTask */
 }
