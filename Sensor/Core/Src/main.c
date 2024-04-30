@@ -46,6 +46,7 @@ DMA_HandleTypeDef hdma_adc1;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -61,6 +62,13 @@ const osThreadAttr_t ldrTask_attributes = {
   .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
+/* Definitions for ultrasoundTask */
+osThreadId_t ultrasoundTaskHandle;
+const osThreadAttr_t ultrasoundTask_attributes = {
+  .name = "ultrasoundTask",
+  .priority = (osPriority_t) osPriorityLow,
+  .stack_size = 128 * 4
+};
 /* USER CODE BEGIN PV */
 uint16_t readValue;
 /* USER CODE END PV */
@@ -73,8 +81,10 @@ static void MX_TIM1_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_ICACHE_Init(void);
+static void MX_TIM4_Init(void);
 void StartDefaultTask(void *argument);
 void StartLDRTask(void *argument);
+void StartUltrasoundTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -118,6 +128,7 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM3_Init();
   MX_ICACHE_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   HAL_ADC_Start(&hadc1);
   /* USER CODE END 2 */
@@ -147,6 +158,9 @@ int main(void)
 
   /* creation of ldrTask */
   ldrTaskHandle = osThreadNew(StartLDRTask, NULL, &ldrTask_attributes);
+
+  /* creation of ultrasoundTask */
+  ultrasoundTaskHandle = osThreadNew(StartUltrasoundTask, NULL, &ultrasoundTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 
@@ -438,6 +452,51 @@ static void MX_TIM3_Init(void)
 }
 
 /**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 0;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 65535;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+
+}
+
+/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -590,6 +649,24 @@ void StartLDRTask(void *argument)
 	  osDelay(300);
   }
   /* USER CODE END StartLDRTask */
+}
+
+/* USER CODE BEGIN Header_StartUltrasoundTask */
+/**
+* @brief Function implementing the ultrasoundTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartUltrasoundTask */
+void StartUltrasoundTask(void *argument)
+{
+  /* USER CODE BEGIN StartUltrasoundTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartUltrasoundTask */
 }
 
 /**
