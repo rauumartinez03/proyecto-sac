@@ -285,7 +285,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIG_T3_TRGO;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   hadc1.Init.OversamplingMode = DISABLE;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -442,9 +442,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
+  htim3.Init.Prescaler = 65535;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 1;
+  htim3.Init.Period = 16784;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -658,12 +658,14 @@ void StartLDRTask(void *argument)
 {
   /* USER CODE BEGIN StartLDRTask */
   /* Infinite loop */
+	int cont = 0;
   for(;;)
   {
 	  //HAL_ADC_PollForConversion(&hadc1,3000);
 	  //readValue = HAL_ADC_GetValue(&hadc1);
-	  //printf("LDR: %d\n\r", aADCxConvertedData[0]);
-	  //osDelay(1000);
+	  cont++;
+	  printf("LDR: %d Call %d\n\r", aADCxConvertedData[0], cont);
+	  osDelay(10000);
   }
   /* USER CODE END StartLDRTask */
 }
